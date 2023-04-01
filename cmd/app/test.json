@@ -1,0 +1,91 @@
+{
+   "action":"create",
+   "result":"",
+   "params":[
+      "text.txt"
+   ],
+   "next":{
+      "action":"condition",
+      "result":" ",
+      "params":[
+         "2006-01-02 15:04:05"
+      ],
+      "next_true":{
+         "action":"write_string",
+         "result":"",
+         "params":[
+            "text.txt", "Hello World!"
+         ],
+         "next":{
+            "action":"condition",
+            "result":"",
+            "params":[
+               "2006-01-02 15:04:05"
+            ],
+            "next_true":{
+               "action":"change_name",
+               "result":"",
+               "params":[
+                  "text.txt", "newtext.txt"
+               ]
+            },
+            "next_false":{
+               "action":"get_btime",
+               "result":"",
+               "params":[
+                  "text.txt"
+               ],
+               "next":{
+                  "action":"condition",
+                  "result":"",
+                  "params":[
+                     "2006-01-02 15:04:05"
+                  ],
+                  "next_true":{
+                     "action":"get_btime",
+                     "result":"",
+                     "params":[
+                        "text.txt"
+                     ]
+                  },
+                  "next_false":{
+                     "action":"remove_file",
+                     "result":"",
+                     "params":[
+                        "date.txt"
+                     ]
+                  }
+               }
+            }
+         }
+      },
+      "next_false":{
+         "action":"create",
+         "result":"",
+         "params":[
+            "nano.txt"
+         ],
+         "next":{
+            "action":"condition",
+            "result":"",
+            "params":[
+               "2006-01-02 15:04:05"
+            ],
+            "next_true":{
+               "action":"remove_file",
+               "result":"",
+               "params":[
+                  "nano2.txt"
+               ]
+            },
+            "next_false":{
+               "action":"change_name",
+               "result":"",
+               "params":[
+                  "nano.txt", "nano2.txt"
+               ]
+            }
+         }
+      }
+   }
+}
