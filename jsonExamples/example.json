@@ -1,0 +1,97 @@
+{
+   "action":"create",
+   "next":{
+      "action":"condition",
+      "next_false":{
+         "action":"create",
+         "next":{
+            "action":"condition",
+            "next_false":{
+               "action":"change_name",
+               "params":[
+                  "nano.txt",
+                  "super_nano.txt"
+               ],
+               "result":""
+            },
+            "next_true":{
+               "action":"remove_file",
+               "params":[
+                  "text.txt"
+               ],
+               "result":""
+            },
+            "params":[
+               "2023-04-02 15:04:05"
+            ],
+            "result":""
+         },
+         "params":[
+            "nano.txt"
+         ],
+         "result":""
+      },
+      "next_true":{
+         "action":"write_string",
+         "next":{
+            "action":"condition",
+            "next_false":{
+               "action":"get_btime",
+               "next":{
+                  "action":"condition",
+                  "next_false":{
+                     "action":"remove_file",
+                     "params":[
+                        "date.txt"
+                     ],
+                     "result":""
+                  },
+                  "next_true":{
+                     "action":"get_btime",
+                     "params":[
+                        "text.txt"
+                     ],
+                     "result":""
+                  },
+                  "params":[
+                     "2006-01-02 15:04:05"
+                  ],
+                  "result":""
+               },
+               "params":[
+                  "text.txt"
+               ],
+               "result":""
+            },
+            "next_true":{
+               "action":"change_name",
+               "params":[
+                  "text.txt",
+                  "super_text.txt"
+               ],
+               "result":""
+            },
+            "params":[
+               "2006-01-02 15:04:05"
+            ],
+            "result":""
+         },
+         "params":[
+            "text.txt",
+            "This message from moon"
+         ],
+         "result":""
+      },
+      "params":[
+         "2023-04-01 21:04:05"
+      ],
+      "result":""
+   },
+   "next_params":[
+      "2023-04-01 22:04:08"
+   ],
+   "params":[
+      "text.txt"
+   ],
+   "result":""
+}

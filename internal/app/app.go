@@ -6,196 +6,57 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 
-	// "strings"
+	"strings"
 
-	"github.com/djherbis/times"
+	"TestRIT/internal/logger"
+	"TestRIT/internal/methods"
 )
 
-type File struct {
-	Data interface{}
-}
-
-type Action struct {
-	Action      string
-	Result      string
-	Params      []string
-	Condition   string
-	Next_action string
-}
-
 func RunApp() {
+	//Inti logger
+	logger.Init()
+	logger.InfoLogger.Println("Starting the application...")
 
-	f, err := os.Open("test.json")
+	//Read console's args
+	readArgs := os.Args[1:]
+	pathToFile := strings.Join(readArgs, "")
+
+	//Open file
+	f, err := os.Open(pathToFile)
 	if err != nil {
-		fmt.Println(err)
+		logger.ErrorLogger.Println(err)
 	}
 	defer f.Close()
 
-	// Чтение файла с ридером
+	//Read file with reader
 	wr := bytes.Buffer{}
 	sc := bufio.NewScanner(f)
 	for sc.Scan() {
 		wr.WriteString(sc.Text())
 	}
 
+	//Unmarshal JSON
 	var jsonFile interface{}
 	err = json.Unmarshal(wr.Bytes(), &jsonFile)
 	if err != nil {
-		fmt.Println(err)
+		logger.ErrorLogger.Println(err)
 	}
 
-	СheckJson(jsonFile)
+	//Writing result JSON
+	result := methods.СheckJson(jsonFile, false)
 
-}
+	resulJson, resErr := json.Marshal(result)
+	if resErr != nil {
+		logger.ErrorLogger.Println(resErr)
+	}
 
-func CreateFile(name string) (err error) {
+	pathToSave := filepath.Dir(pathToFile)
+	savePath := fmt.Sprintf("%s\\resultJSON.json", pathToSave)
 
-	file, err := os.Create(name)
+	err = os.WriteFile(savePath, resulJson, 0644)
 	if err != nil {
-		fmt.Println(err)
+		logger.ErrorLogger.Println(err)
 	}
-	file.Close()
-	return
-
-}
-
-func RenameFile(oldPath string, newPath string) {
-	err := os.Rename(oldPath, newPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-}
-
-func RemoveFile(name string) {
-	err := os.Remove(name)
-	if err != nil {
-		fmt.Println(err)
-	}
-}
-
-func bTime(name string) {
-	t, err := times.Stat(name)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	fmt.Println(t.AccessTime())
-}
-
-func writeString(name string, data string) {
-
-	file, err := os.OpenFile(name, os.O_APPEND|os.O_WRONLY, 0600)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	defer file.Close()
-
-	file.WriteString(data)
-}
-
-func СheckJson(data interface{}) {
-
-	myMap := data.(map[string]interface{})
-
-	// nextLevlJson := make(map[string]interface{})
-
-	switch myMap["action"] {
-
-	case "create":
-
-		name := myMap["params"].([]interface{})[0].(string)
-		CreateFile(name)
-
-		fmt.Println("created", name)
-
-		result := fmt.Sprintf("file %s created", name)
-
-		myMap["result"] = result
-
-	case "condition":
-
-		conditionTime := "2006-01-02 15:04:01"
-
-		cond := myMap["params"].([]interface{})[0].(string)
-
-		if cond > conditionTime {
-
-			result := "condition was true"
-			myMap["result"] = result
-
-			fmt.Println(result)
-
-			СheckJson(myMap["next_true"])
-		}
-
-		if cond < conditionTime {
-			result := "condition was false"
-			myMap["result"] = result
-
-			fmt.Println(result)
-
-			СheckJson(myMap["next_false"])
-		}
-
-	case "write_string":
-
-		file_name := myMap["params"].([]interface{})[0].(string)
-
-		dataWrite := myMap["params"].([]interface{})[1].(string)
-
-		result := fmt.Sprintf("random string wrote in %s", file_name)
-		myMap["result"] = result
-
-		fmt.Println(result)
-
-		writeString(file_name, dataWrite)
-
-	case "change_name":
-
-		oldPath := myMap["params"].([]interface{})[0].(string)
-
-		newPath := myMap["params"].([]interface{})[1].(string)
-
-		result := fmt.Sprintf("the file  %s was renamed to %s", oldPath, newPath)
-		myMap["result"] = result
-
-		fmt.Println(result)
-
-		RenameFile(oldPath, newPath)
-
-	case "get_btime":
-		fileName := myMap["params"].([]interface{})[0].(string)
-
-		result := "was born"
-		myMap["result"] = result
-
-		fmt.Println(result)
-
-		bTime(fileName)
-
-	case "remove_file":
-
-		fileName := myMap["params"].([]interface{})[0].(string)
-
-		result := fmt.Sprintf("file  %s removed", fileName)
-		myMap["result"] = result
-
-		fmt.Println("file removed", fileName)
-
-		RemoveFile(fileName)
-
-	}
-
-	_, ok := myMap["next"]
-
-	if ok {
-		СheckJson(myMap["next"])
-	} else {
-
-		fmt.Println(myMap)
-
-		return
-	}
-
 }
